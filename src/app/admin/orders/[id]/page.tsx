@@ -1,15 +1,14 @@
 import { notFound } from "next/navigation";
-import { firestore } from "@/lib/firebase-admin";
-import type { Order, OrderStatus } from "@/lib/types";
+import { db } from "@/lib/db";
+import type { OrderStatus } from "@/lib/types";
 import OrderStatusUpdater from "./OrderStatusUpdater";
 
 export const runtime = "edge";
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const doc = await firestore.getDoc("orders", id);
-  if (!doc.exists) notFound();
-  const order = { id, ...doc.data } as Order;
+  const order = await db.getOrder(id);
+  if (!order) notFound();
 
   return (
     <div className="max-w-2xl space-y-6">

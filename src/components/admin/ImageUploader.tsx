@@ -16,18 +16,14 @@ export default function ImageUploader({ images, onChange }: Props) {
     setUploading(true);
     const uploaded: string[] = [];
     for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
       const res = await fetch("/api/storage/upload-url", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, contentType: file.type }),
+        body: formData,
       });
       if (!res.ok) continue;
-      const { uploadUrl, publicUrl, authHeader } = await res.json();
-      await fetch(uploadUrl, {
-        method: "POST",
-        headers: { Authorization: authHeader, "Content-Type": file.type },
-        body: file,
-      });
+      const { publicUrl } = await res.json();
       uploaded.push(publicUrl);
     }
     onChange([...images, ...uploaded]);

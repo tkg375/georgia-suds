@@ -1,12 +1,10 @@
-import { firestore } from "@/lib/firebase-admin";
-import type { Category } from "@/lib/types";
+import { db } from "@/lib/db";
 import CategoryManager from "./CategoryManager";
 
 export const runtime = "edge";
 
 export default async function AdminCategoriesPage() {
-  const docs = await firestore.listDocs("categories");
-  const categories = docs.map((d) => ({ id: d.id, ...d.data } as Category));
+  const categories = await db.listCategories();
 
   return (
     <div>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdminToken, COOKIE_NAME } from "@/lib/admin-auth";
-import { firestore } from "@/lib/firebase-admin";
+import { db } from "@/lib/db";
 
 export const runtime = "edge";
 
@@ -14,6 +14,6 @@ async function requireAdmin() {
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  await firestore.deleteDoc("categories", id);
+  await db.deleteCategory(id);
   return NextResponse.json({ success: true });
 }

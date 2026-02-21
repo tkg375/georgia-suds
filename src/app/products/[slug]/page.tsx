@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { firestore } from "@/lib/firebase-admin";
-import type { Product } from "@/lib/types";
+import { db } from "@/lib/db";
 import AddToCartButton from "@/components/storefront/AddToCartButton";
 
 export const runtime = "edge";
@@ -9,16 +8,10 @@ export const runtime = "edge";
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  const docs = await firestore.query(
-    "products",
-    [
-      { field: "slug", op: "EQUAL", value: slug },
-      { field: "active", op: "EQUAL", value: true },
-    ]
-  );
+  const products = await db.queryProducts({ activeOnly: true });
+  const product = products.find((p) => p.slug === slug);
 
-  if (!docs.length) notFound();
-  const product = { id: docs[0].id, ...docs[0].data } as Product;
+  if (!product) notFound();
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-16">

@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { firestore } from "@/lib/firebase-admin";
-import type { Order } from "@/lib/types";
+import { db } from "@/lib/db";
 
 export const runtime = "edge";
 
@@ -13,10 +12,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default async function AdminOrdersPage() {
-  const docs = await firestore.listDocs("orders");
-  const orders = docs
-    .map((d) => ({ id: d.id, ...d.data } as Order))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const orders = await db.listOrders();
 
   return (
     <div>

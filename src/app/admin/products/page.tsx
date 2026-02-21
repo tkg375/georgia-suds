@@ -1,15 +1,11 @@
 import Link from "next/link";
-import { firestore } from "@/lib/firebase-admin";
-import type { Product } from "@/lib/types";
+import { db } from "@/lib/db";
 import DeleteProductButton from "./DeleteProductButton";
 
 export const runtime = "edge";
 
 export default async function AdminProductsPage() {
-  const docs = await firestore.listDocs("products");
-  const products = docs
-    .map((d) => ({ id: d.id, ...d.data } as Product))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const products = await db.listProducts();
 
   return (
     <div>

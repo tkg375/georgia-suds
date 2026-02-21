@@ -1,5 +1,4 @@
-import { firestore } from "@/lib/firebase-admin";
-import type { Product } from "@/lib/types";
+import { db } from "@/lib/db";
 import Hero from "@/components/storefront/Hero";
 import ProductGrid from "@/components/storefront/ProductGrid";
 import Link from "next/link";
@@ -7,14 +6,7 @@ import Link from "next/link";
 export const runtime = "edge";
 
 export default async function HomePage() {
-  const docs = await firestore.query(
-    "products",
-    [{ field: "active", op: "EQUAL", value: true }],
-    "createdAt",
-    "DESCENDING",
-    6
-  );
-  const products = docs.map((d) => ({ id: d.id, ...d.data } as Product));
+  const products = await db.queryProducts({ activeOnly: true, limit: 6 });
 
   return (
     <main>

@@ -1,5 +1,4 @@
-import { firestore } from "@/lib/firebase-admin";
-import type { Product, Category } from "@/lib/types";
+import { db } from "@/lib/db";
 import ProductGrid from "@/components/storefront/ProductGrid";
 import CategoryFilter from "@/components/storefront/CategoryFilter";
 import { Suspense } from "react";
@@ -13,18 +12,10 @@ export default async function ShopPage({
 }) {
   const { category } = await searchParams;
 
-  const filters: Array<{ field: string; op: string; value: unknown }> = [
-    { field: "active", op: "EQUAL", value: true },
-  ];
-  if (category) filters.push({ field: "category", op: "EQUAL", value: category });
-
-  const [productDocs, categoryDocs] = await Promise.all([
-    firestore.query("products", filters, "createdAt", "DESCENDING"),
-    firestore.listDocs("categories"),
+  const [products, categories] = await Promise.all([
+    db.queryProducts({ activeOnly: true, category }),
+    db.listCategories(),
   ]);
-
-  const products = productDocs.map((d) => ({ id: d.id, ...d.data } as Product));
-  const categories = categoryDocs.map((d) => ({ id: d.id, ...d.data } as Category));
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-12">

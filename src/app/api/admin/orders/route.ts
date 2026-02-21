@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdminToken, COOKIE_NAME } from "@/lib/admin-auth";
-import { firestore } from "@/lib/firebase-admin";
-import type { Order } from "@/lib/types";
+import { db } from "@/lib/db";
 
 export const runtime = "edge";
 
@@ -12,9 +11,6 @@ export async function GET() {
   if (!token || !(await verifyAdminToken(token))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const docs = await firestore.listDocs("orders");
-  const orders = docs
-    .map((d) => ({ id: d.id, ...d.data } as Order))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const orders = await db.listOrders();
   return NextResponse.json({ orders });
 }

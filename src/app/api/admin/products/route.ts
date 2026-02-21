@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdminToken, COOKIE_NAME } from "@/lib/admin-auth";
-import { firestore } from "@/lib/firebase-admin";
-import type { Product } from "@/lib/types";
+import { db } from "@/lib/db";
 
 export const runtime = "edge";
 
@@ -16,9 +15,7 @@ export async function GET() {
   if (!(await requireAdmin())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const docs = await firestore.listDocs("products");
-  const products = docs.map((d) => ({ id: d.id, ...d.data } as Product));
-  products.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const products = await db.listProducts();
   return NextResponse.json({ products });
 }
 
@@ -27,17 +24,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await req.json();
-  const data = {
+  const product = await db.createProduct({
     name: body.name,
     slug: body.slug,
-    description: body.description,
+    description: body.description ?? "",
     price: Number(body.price),
     images: body.images ?? [],
     stock: Number(body.stock),
     category: body.category ?? "",
     active: body.active ?? true,
     createdAt: new Date().toISOString(),
-  };
-  const id = await firestore.addDoc("products", data);
-  return NextResponse.json({ product: { id, ...data } }, { status: 201 });
+  });
+  return NextResponse.json({ product }, { status: 201 });
 }

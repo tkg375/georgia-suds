@@ -1,12 +1,10 @@
-import { firestore } from "@/lib/firebase-admin";
-import type { Category } from "@/lib/types";
+import { db } from "@/lib/db";
 import ProductForm from "@/components/admin/ProductForm";
 
 export const runtime = "edge";
 
 export default async function NewProductPage() {
-  const docs = await firestore.listDocs("categories");
-  const categories = docs.map((d) => ({ id: d.id, ...d.data } as Category));
+  const categories = await db.listCategories();
 
   return (
     <div>

@@ -6,6 +6,15 @@ assets = { directory = ".open-next/assets", binding = "ASSETS" }
 
 [vars]
 NEXT_PUBLIC_APP_URL = "https://thegildedbar.com"
-# All secrets (FIREBASE_PRIVATE_KEY, STRIPE_SECRET_KEY, ADMIN_JWT_SECRET, etc.)
-# must be added via: wrangler secret put <NAME>
-# or set in the Cloudflare Pages dashboard under Settings > Environment variables
+
+# Secrets — add via: wrangler secret put <NAME>
+# Required: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, ADMIN_JWT_SECRET
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gilded-bar-db"
+database_id = "REPLACE_WITH_YOUR_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "gilded-bar-images"

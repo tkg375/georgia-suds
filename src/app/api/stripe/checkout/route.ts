@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
-import { firestore } from "@/lib/firebase-admin";
-import type { CartItem, Product } from "@/lib/types";
+import { db } from "@/lib/db";
+import type { CartItem } from "@/lib/types";
 
 export const runtime = "edge";
 
@@ -16,11 +16,10 @@ export async function POST(req: NextRequest) {
 
   // Validate stock for each item
   for (const item of items) {
-    const doc = await firestore.getDoc("products", item.productId);
-    if (!doc.exists) {
+    const product = await db.getProduct(item.productId);
+    if (!product) {
       return NextResponse.json({ error: `Product "${item.name}" no longer exists` }, { status: 400 });
     }
-    const product = doc.data as unknown as Product;
     if (!product.active) {
       return NextResponse.json({ error: `"${item.name}" is no longer available` }, { status: 400 });
     }
@@ -32,25 +31,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Create pending order in Firestore
-  const orderId = await firestore.addDoc("orders", {
-    stripePaymentIntentId: "",
-    stripeSessionId: "",
-    items: items.map((i) => ({
-      productId: i.productId,
-      productName: i.name,
-      productSlug: i.slug,
-      quantity: i.quantity,
-      unitPrice: i.price,
-    })),
-    customerEmail: "",
-    status: "pending",
-    shippingAddress: {},
-    subtotalCents: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
-    createdAt: new Date().toISOString(),
-  });
-
-  // Create Stripe Checkout Session
+  // Create Stripe Checkout Session first to get the session ID
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
@@ -63,13 +44,27 @@ export async function POST(req: NextRequest) {
       quantity: item.quantity,
     })),
     shipping_address_collection: { allowed_countries: ["US", "CA", "GB", "AU"] },
-    metadata: { orderId },
     success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/checkout/cancel`,
   });
 
-  // Update order with session ID
-  await firestore.updateDoc("orders", orderId, { stripeSessionId: session.id });
+  // Create pending order in D1
+  const orderId = await db.createOrder({
+    stripeSessionId: session.id,
+    items: items.map((i) => ({
+      productId: i.productId,
+      productName: i.name,
+      productSlug: i.slug,
+      quantity: i.quantity,
+      unitPrice: i.price,
+    })),
+    subtotalCents: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+  });
+
+  // Store orderId in session metadata via update (Stripe doesn't support metadata on create for some flows)
+  await getStripe().checkout.sessions.update(session.id, {
+    metadata: { orderId },
+  });
 
   return NextResponse.json({ url: session.url });
 }

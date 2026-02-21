@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdminToken, COOKIE_NAME } from "@/lib/admin-auth";
-import { getSignedUploadUrl, getUploadAuthHeader } from "@/lib/firebase-storage";
+import { getImagesBucket } from "@/lib/db";
 
 export const runtime = "edge";
 
@@ -12,14 +12,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { filename, contentType } = await req.json();
-  if (!filename || !contentType) {
-    return NextResponse.json({ error: "filename and contentType required" }, { status: 400 });
+  const formData = await req.formData();
+  const file = formData.get("file") as File | null;
+  if (!file) {
+    return NextResponse.json({ error: "No file provided" }, { status: 400 });
   }
 
-  const uniqueName = `${Date.now()}-${filename}`;
-  const { uploadUrl, publicUrl } = await getSignedUploadUrl(uniqueName, contentType);
-  const authHeader = await getUploadAuthHeader();
+  const key = `products/${Date.now()}-${file.name}`;
+  const bucket = await getImagesBucket();
 
-  return NextResponse.json({ uploadUrl, publicUrl, authHeader });
+  await bucket.put(key, await file.arrayBuffer(), {
+    httpMetadata: { contentType: file.type },
+  });
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const publicUrl = `${appUrl}/api/images/${key}`;
+
+  return NextResponse.json({ publicUrl });
 }
