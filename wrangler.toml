@@ -1,0 +1,11 @@
+name = "the-gilded-bar"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+main = ".open-next/worker.js"
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
+
+[vars]
+NEXT_PUBLIC_APP_URL = "https://thegildedbar.com"
+# All secrets (FIREBASE_PRIVATE_KEY, STRIPE_SECRET_KEY, ADMIN_JWT_SECRET, etc.)
+# must be added via: wrangler secret put <NAME>
+# or set in the Cloudflare Pages dashboard under Settings > Environment variables
