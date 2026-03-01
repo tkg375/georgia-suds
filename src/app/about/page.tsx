@@ -14,8 +14,8 @@ export default function AboutPage() {
       <div className="space-y-6 text-stone-600 leading-relaxed text-lg">
         <p>
           Georgia Suds was born from a simple belief — that the everyday ritual of washing your hands
-          should feel like a small luxury. We craft each bar by hand in small batches, using only
-          natural ingredients sourced from trusted suppliers.
+          should feel like a small luxury. We craft each bar by hand in small batches right here in
+          Georgia, using only natural ingredients sourced from trusted suppliers.
         </p>
         <p>
           Every soap starts with a base of nourishing oils — olive, coconut, and shea — and is
@@ -31,7 +31,7 @@ export default function AboutPage() {
 
       <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
         {[
-          { label: "Small-batch", detail: "Every bar made by hand" },
+          { label: "Small-batch", detail: "Every bar handcrafted in Georgia" },
           { label: "Natural", detail: "No synthetic ingredients" },
           { label: "4-week cure", detail: "For a longer-lasting bar" },
         ].map(({ label, detail }) => (

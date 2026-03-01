@@ -8,7 +8,7 @@ export default function Hero() {
         <div className="flex justify-center mb-6">
           <GildedBarLogo size={72} showText={false} id="hero" />
         </div>
-        <p className="text-xs tracking-[0.3em] uppercase text-peach-700 mb-4">Handcrafted with care</p>
+        <p className="text-xs tracking-[0.3em] uppercase text-peach-700 mb-4">Handcrafted in Georgia</p>
         <h1
           className="text-5xl md:text-7xl leading-tight mb-6"
           style={{
@@ -23,7 +23,7 @@ export default function Hero() {
           Georgia Suds
         </h1>
         <p className="text-lg text-peach-500 max-w-md mx-auto mb-10">
-          Small-batch artisan soaps made from natural ingredients. Each bar is a little luxury.
+          Small-batch artisan soaps handcrafted in Georgia. Made from natural ingredients — each bar is a little luxury.
         </p>
         <Link
           href="/shop"
