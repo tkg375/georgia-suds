@@ -4,6 +4,9 @@ compatibility_flags = ["nodejs_compat"]
 main = ".open-next/worker.js"
 assets = { directory = ".open-next/assets", binding = "ASSETS" }
 
+[build]
+command = "npx opennextjs-cloudflare build"
+
 [vars]
 NEXT_PUBLIC_APP_URL = "https://georgia-suds.tgordo03.workers.dev"
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_51T3Nne5Y8iCPVoPs3B0P9iKy4JJKn1KXONvmXdp0XTfxzfU9rrKbJmEKAUj47RKNtMirWztbXgghxzD6gHvaN3Xs00AISRS84F"
